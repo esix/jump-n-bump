@@ -1,4 +1,7 @@
 .idea
+tmp
 client/bin
 client/start.sh
+client/vendor
+server/start.sh
 
