@@ -44,13 +44,13 @@ class Keyboard {
     }
 
     private function toggle_player_enabled($playerIndex) {
-        global $player;
-        $player[$playerIndex]->enabled = !$player[$playerIndex]->enabled;
+        global $players;
+        $players[$playerIndex]->enabled = !$players[$playerIndex]->enabled;
     }
 
     private function toggle_ai_enabled($playerIndex) {
-        global $player;
-        $p = $player[$playerIndex];
+        global $players;
+        $p = $players[$playerIndex];
         $p->ai = !$p->ai;
         $this->delkey($p, 0);
         $this->delkey($p, 1);

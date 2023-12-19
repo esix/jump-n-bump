@@ -22,7 +22,6 @@ class Movement {
         $this->settings = $settings;
     }
 
-
     public function steer_player($p) {
         $s1 = 0;
         $s2 = 0;
@@ -239,12 +238,14 @@ class Movement {
     }
 
     public function collision_check() {
-        global $player;
+        global $players;
         /* collision check */
-        for ($c1 = 0; $c1 < 3; $c1++) {
-            for ($c2 = $c1 + 1; $c2 < 4; $c2++) {
-                $pair = new Player_Pair($player[$c1], $player[$c2], $this->sfx, $this->renderer, $this->objects, $this->img, $this->settings);
-                $pair->collision_check();
+        foreach ($players as $c1 => $p1) {
+            foreach ($players as $c2 => $p2) {
+                if ($c1 < $c2) {
+                    $pair = new Player_Pair($p1, $p2, $this->sfx, $this->renderer, $this->objects, $this->img, $this->settings);
+                    $pair->collision_check();
+                }
             }
         }
     }

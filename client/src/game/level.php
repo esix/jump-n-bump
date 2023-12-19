@@ -25,7 +25,7 @@ function GET_BAN_MAP_XY($x, $y) {
 function GET_BAN_MAP($x, $y) {
     global $ban_map;
     if ($y < 0) $y = 0;
-    return $ban_map[$x + $y * LEVEL_WIDTH];
+    return $ban_map[$x + $y * LEVEL_WIDTH] ?? null;
 }
 
 function GET_BAN_MAP_IN_WATER($s1, $s2) {

@@ -40,28 +40,25 @@ class Game {
     }
 
     private function reset_players() {
-        global $player;
-        $player = [
+        global $players;
+        $players = [
             new Player(0, [SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_UP], $this->is_server),
             new Player(1, [SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_W], $this->is_server),
             new Player(2, [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8], $this->is_server),
             new Player(3, [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I], $this->is_server)
         ];
-        $player[3]->ai = true;
+        $players[3]->ai = true;
     }
 
     private function reset_level() {
-        global $player;
+        global $players;
         SET_BAN_MAP($this->level['ban_map']);
         $this->objects->reset_objects();
 
-        for ($c1 = 0; $c1 < env['JNB_MAX_PLAYERS']; $c1++) {
-            if ($player[$c1]->enabled) {
-                $player[$c1]->bumps = 0;
-                for ($c2 = 0; $c2 < env['JNB_MAX_PLAYERS']; $c2++) {
-                    $player[$c1]->bumped[$c2] = 0;
-                }
-                $player[$c1]->position_player($c1);
+        foreach ($players as $p) {
+            if ($p->enabled) {
+                $p->bumps = 0;
+                $p->position_player();
             }
         }
     }
@@ -71,20 +68,19 @@ class Game {
     }
 
     private function update_player_actions() {
-        global $player;
-        for ($i = 0; $i != count($player); ++$i) {
-            $player[$i]->action_left = call_user_func($this->key_pressed, $player[$i]->keys[0]);
-            $player[$i]->action_right = call_user_func($this->key_pressed, $player[$i]->keys[1]);
-            $player[$i]->action_up = call_user_func($this->key_pressed, $player[$i]->keys[2]);
+        global $players;
+        foreach ($players as $p) {
+            $p->action_left = call_user_func($this->key_pressed, $p->keys[0]);
+            $p->action_right = call_user_func($this->key_pressed, $p->keys[1]);
+            $p->action_up = call_user_func($this->key_pressed, $p->keys[2]);
         }
     }
 
     private function steer_players() {
-        global $player;
+        global $players;
         $this->ai->cpu_move();
         $this->update_player_actions();
-        for ($playerIndex = 0; $playerIndex != count($player); ++$playerIndex) {
-            $p = $player[$playerIndex];
+        foreach ($players as $p) {
             if ($p->enabled) {
                 if (!$p->dead_flag) {
                     $this->movement->steer_player($p);

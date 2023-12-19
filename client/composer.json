@@ -2,6 +2,8 @@
   "require": {
     "react/promise":  "^3.1.0",
     "textalk/websocket": "^1.6",
-    "peridot-php/event-emitter": "dev-master"
+    "peridot-php/event-emitter": "dev-master",
+    "ratchet/pawl": "^0.4.1",
+    "amphp/websocket-client": "^1.0"
   }
 }

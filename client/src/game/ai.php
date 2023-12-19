@@ -17,19 +17,20 @@ class AI {
     }
 
     private function nearest_player($i) {
-        global $player;
+        global $players;
         $nearest_distance = -1;
         $target = null;
-        for ($j = 0; $j < env['JNB_MAX_PLAYERS']; $j++) {
-            if ($i == $j || !$player[$j]->enabled) {
+        $p1 = $players[$i];
+        foreach ($players as $j => $p2) {
+            if ($i == $j || !$p2->enabled) {
                 continue;
             }
-            $deltax = $player[$j]->x->pos - $player[$i]->x->pos;
-            $deltay = $player[$j]->y->pos - $player[$i]->y->pos;
+            $deltax = $p2->x->pos - $p1->x->pos;
+            $deltay = $p2->y->pos - $p1->y->pos;
             $players_distance = $deltax * $deltax + $deltay * $deltay;
 
             if ($players_distance < $nearest_distance || $nearest_distance == -1) {
-                $target = $player[$j];
+                $target = $p2;
                 $nearest_distance = $players_distance;
             }
         }
@@ -37,9 +38,8 @@ class AI {
     }
 
     public function cpu_move() {
-        global $player;
-        for ($i = 0; $i < env['JNB_MAX_PLAYERS']; $i++) {
-            $current_player = $player[$i];
+        global $players;
+        foreach ($players as $i => $current_player) {
             if (!$current_player->enabled || !$current_player->ai) continue;
             $target = $this->nearest_player($i);
             if ($target == null) continue;

@@ -4,7 +4,7 @@ require_once __DIR__ . "/../env.php";
 require_once __DIR__ . "/../game/level.php";
 require_once __DIR__ . "/../asset_data/default_levelmap.php";
 
-$player = [];
+$players = [];
 
 
 class Player {
@@ -18,9 +18,8 @@ class Player {
     public $enabled = true;
     public $dead_flag = false;
     public $bumps = false;
-    public $bumped = [];
-    public $x;
-    public $y;
+    public Point $x;
+    public Point $y;
     public $direction = 0;
     public $jump_ready = false;
     public $jump_abort = false;
@@ -52,7 +51,7 @@ class Player {
                 if ($this->anim != 6)
                     $this->frame = env['animation_data']->players[$this->anim]['restart_frame'];
                 else
-                    $this->position_player($this->player_index);
+                    $this->position_player();
             }
             $this->frame_tick = 0;
         }
@@ -62,37 +61,38 @@ class Player {
         return env['animation_data']->players[$this->anim]['frame'][$this->frame]['image'] + $this->direction * 9;
     }
 
-    public function position_player($player_num) {
-        global $player;
+    public function position_player() {
+        global $players;
+        $player_num = $this->player_index;
 
-        while (1) {
-            while (1) {
-                $s1 = rnd(LEVEL_WIDTH);
-                $s2 = rnd(LEVEL_HEIGHT);
-                if (GET_BAN_MAP($s1, $s2) == BAN_VOID && (GET_BAN_MAP($s1, $s2 + 1) == BAN_SOLID || GET_BAN_MAP($s1, $s2 + 1) == BAN_ICE))
-                    break;
-            }
-            for ($c1 = 0; $c1 < env['JNB_MAX_PLAYERS']; $c1++) {
-                if ($c1 != $player_num && $player[$c1]->enabled) {
-                    if (abs(($s1 << LEVEL_SCALE_FACTOR) - ($player[$c1]->x->pos >> 16)) < 32 && abs(($s2 << LEVEL_SCALE_FACTOR) - ($player[$c1]->y->pos >> 16)) < 32)
-                        break;
+        do {
+            $x = rnd(LEVEL_WIDTH);
+            $y = rnd(LEVEL_HEIGHT);
+            $good_place = true;
+            if (GET_BAN_MAP($x, $y) != BAN_VOID) $good_place = false;
+            else if (!(GET_BAN_MAP($x, $y + 1) == BAN_SOLID || GET_BAN_MAP($x, $y + 1) == BAN_ICE)) $good_place = false;
+            else {
+                foreach ($players as $p) {
+                    if ($p != $this && $p->enabled) {
+                        if (abs(($x << LEVEL_SCALE_FACTOR) - ($p->x->pos >> 16)) < 32 && abs(($y << LEVEL_SCALE_FACTOR) - ($p->y->pos >> 16)) < 32) {
+                            $good_place = false;
+                            break;
+                        }
+                    }
                 }
             }
-            if ($c1 == env['JNB_MAX_PLAYERS']) {
-                $player[$player_num]->x->pos = $s1 << 20;
-                $player[$player_num]->y->pos = $s2 << 20;
-                $player[$player_num]->x->velocity = $player[$player_num]->y->velocity = 0;
-                $player[$player_num]->direction = 0;
-                $player[$player_num]->jump_ready = 1;
-                $player[$player_num]->in_water = 0;
-                $player[$player_num]->set_anim(0);
+        } while (!$good_place);
 
-                if ($this->is_server) {
-                    $player[$player_num]->dead_flag = 0;
-                }
+        $this->x->pos = $x << 20;
+        $this->y->pos = $y << 20;
+        $this->x->velocity = $this->y->velocity = 0;
+        $this->direction = 0;
+        $this->jump_ready = 1;
+        $this->in_water = 0;
+        $this->set_anim(0);
 
-                break;
-            }
+        if ($this->is_server) {
+            $this->dead_flag = 0;
         }
     }
 }

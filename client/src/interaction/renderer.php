@@ -100,14 +100,14 @@ class Renderer {
     }
 
     public function draw() {
-        global $player;
+        global $players;
         $this->resize_canvas();
 
         SDL_RenderCopy($this->canvas, $this->level['image'], null, null);
 
-        for ($i = 0; $i < env['JNB_MAX_PLAYERS']; $i++) {
-            if ($player[$i]->enabled) {
-                $this->add_pob($player[$i]->x->pos >> 16, $player[$i]->y->pos >> 16, $this->img['rabbits'], rabbit_gobs[$player[$i]->get_image() + $i * 18]);
+        foreach ($players as $p) {
+            if ($p->enabled) {
+                $this->add_pob($p->x->pos >> 16, $p->y->pos >> 16, $this->img['rabbits'], rabbit_gobs[$p->get_image() + $p->player_index * 18]);
             }
         }
         $this->draw_leftovers();

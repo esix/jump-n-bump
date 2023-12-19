@@ -89,7 +89,6 @@ class Player_Pair {
             }
             $this->sfx->death();
             $killer->bumps++;
-            $killer->bumped[$victim->player_index]++;
             $s1 = $killer->bumps % 100;
             if ($s1 % 10 == 0) {
                 $this->renderer->add_leftovers(360, 34 + $killer->player_index * 64, $this->img['numbers'], number_gobs[floor($s1 / 10) % 10]);
@@ -97,5 +96,4 @@ class Player_Pair {
             $this->renderer->add_leftovers(376, 34 + $killer->player_index * 64, $this->img['numbers'], number_gobs[$s1 % 10]);
         }
     }
-
 }

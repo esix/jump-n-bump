@@ -2,7 +2,7 @@
 require_once __DIR__ . '/asset_data/animation_data.php';
 
 const env = array(
-    'JNB_MAX_PLAYERS' => 4,
+    // 'JNB_MAX_PLAYERS' => 4,
     'MAX_OBJECTS' => 200,
     'animation_data' => new Animation_Data(),
     'level' => array(),
