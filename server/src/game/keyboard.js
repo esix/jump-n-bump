@@ -1,5 +1,5 @@
 
-function Keyboard(key_function_mappings) {
+function Keyboard() {
   "use strict";
   var self = this;
   var keys_pressed = {}
@@ -21,26 +21,17 @@ function Keyboard(key_function_mappings) {
 
   this.onKeyUp = function(evt) {
     keys_pressed[evt.keyCode] = false;
-    var uppercase_string = String.fromCharCode(evt.keyCode);
-    if (evt.keyCode >= 49 && evt.keyCode <= 52) {
-      var i = evt.keyCode - 49;
-      if (evt.altKey) toggle_ai_enabled(i);
-      else toggle_player_enabled(i);
-    } else {
-      var action = key_function_mappings[uppercase_string];
-      if (action != null) action();
-    }
   }
 
-  function toggle_player_enabled(playerIndex) {
-    players[playerIndex].enabled = !players[playerIndex].enabled;
-  }
-
-  function toggle_ai_enabled(playerIndex) {
-    var p = players[playerIndex];
-    p.ai = !p.ai;
-    self.delkey(p, 0);
-    self.delkey(p, 1);
-    self.delkey(p, 2);
-  }
+  // function toggle_player_enabled(idx) {
+  //   players[idx].enabled = !players[idx].enabled;
+  // }
+  //
+  // function toggle_ai_enabled(idx) {
+  //   var p = players[idx];
+  //   p.ai = !p.ai;
+  //   self.delkey(p, 0);
+  //   self.delkey(p, 1);
+  //   self.delkey(p, 2);
+  // }
 }

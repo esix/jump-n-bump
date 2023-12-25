@@ -1,24 +1,12 @@
-console.log("Start", globalThis);
-
-let _id = 1;
-let boards = [];
+let g_boards = [];
 let g_players = [];
 
-function genId() { return String(_id++); }
 
-class GPlayer {
-  id;
-  idx;
-  board;
-  constructor() {
-    this.id = genId();
-  }
-}
 
 
 class Board {
-  players = [];
-  current_level;
+  current_level = null;
+  current_game = null;
 
   constructor() {
     this.current_level = create_default_level();
@@ -26,32 +14,21 @@ class Board {
     this.current_game.start();
   }
 
-  addPlayer(player) {
-    this.players.push(player);
-    player.board = this;
+  addPlayer() {
+    let p = this.current_game.add_player();
+    if (p) {
+      p.board = this;
+    }
+    return p;
   }
 }
 
-/**
- *
- * @param {boolean} ai
- * @returns {string}
- */
-function _start(ai) {
-  let player = new GPlayer();
-  let board = boards.find(b => b.players.length < 4);
-  if (!board) boards.push(board = new Board());
-  g_players.push(player);
-  player.idx = board.players.length;
-  board.addPlayer(player);
-  return player.id;
-}
 
-
-// debug: run bots
 
 document.addEventListener('DOMContentLoaded', () => {
-  _start(true);
+  // debug: run players
+  start();
+  start();
 }, false);
 
 
@@ -60,7 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // ** public api **
 
 function start() {
-  return _start(false);
+  let player = null, board = null;
+  for (board of g_boards) {
+    if ((player = board.addPlayer())) break;
+  }
+  if (!player) {
+    g_boards.push(board = new Board());
+    player = board.addPlayer();
+  }
+  g_players.push(player);
+  return player.id;
 }
 
 

@@ -1,4 +1,4 @@
-function Player_Pair(first, second, sfx, renderer, objects, img, settings) {
+function Player_Pair(first, second, renderer, objects, img) {
   "use strict";
 
   this.highest = function () {
@@ -63,17 +63,15 @@ function Player_Pair(first, second, sfx, renderer, objects, img, settings) {
     victim.dead_flag = true;
     if (victim.anim != 6) {
       victim.set_anim(6);
-      if (!settings.no_gore) {
-        objects.add_gore(victim.x.pos, victim.y.pos, victim.player_index);
+      if (!env.no_gore) {
+        objects.add_gore(victim.x.pos, victim.y.pos, victim.idx);
       }
-      sfx.death();
       killer.bumps++;
-      killer.bumped[victim.player_index]++;
       var s1 = killer.bumps % 100;
       if (s1 % 10 == 0) {
-        renderer.add_leftovers(360, 34 + killer.player_index * 64, img.numbers, number_gobs[Math.floor(s1 / 10) % 10]);
+        renderer.add_leftovers(360, 34 + killer.idx * 64, img.numbers, number_gobs[Math.floor(s1 / 10) % 10]);
       }
-      renderer.add_leftovers(376, 34 + killer.player_index * 64, img.numbers, number_gobs[s1 % 10]);
+      renderer.add_leftovers(376, 34 + killer.idx * 64, img.numbers, number_gobs[s1 % 10]);
     }
   }
 }

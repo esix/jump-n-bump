@@ -1,5 +1,5 @@
 
-function Objects(rnd) {
+function Objects() {
   "use strict";
   var self = this;
   this.objects = [];

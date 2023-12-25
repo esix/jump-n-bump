@@ -1,4 +1,4 @@
-function AI(keyboard_state) {
+function AI(players, keyboard_state) {
   "use strict";
 
   function map_tile(x, y) {

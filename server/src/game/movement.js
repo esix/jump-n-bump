@@ -1,4 +1,4 @@
-function Movement(renderer, img, sfx, objects, settings, rnd) {
+function Movement(players, renderer, img, objects) {
   "use strict";
 
   this.steer_player = function (p) {
@@ -33,9 +33,9 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
       }
     }
 
-    if (settings.jetpack == 0) {
+    if (!env.jetpack) {
       /* no jetpack */
-      if (settings.pogostick == 1 || (p.jump_ready == 1 && p.action_up)) {
+      if (env.pogostick || (p.jump_ready == 1 && p.action_up)) {
         s1 = (p.x.pos >> 16);
         s2 = (p.y.pos >> 16);
         if (s2 < -16)
@@ -46,10 +46,6 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
           p.set_anim(2);
           p.jump_ready = 0;
           p.jump_abort = 1;
-          if (settings.pogostick == 0)
-            sfx.jump();
-          else
-            sfx.spring();
         }
         /* jump out of water */
         if (GET_BAN_MAP_IN_WATER(s1, s2)) {
@@ -58,17 +54,13 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
           p.set_anim(2);
           p.jump_ready = 0;
           p.jump_abort = 1;
-          if (settings.pogostick == 0)
-            sfx.jump();
-          else
-            sfx.spring();
         }
       }
       /* fall down by gravity */
-      if (settings.pogostick == 0 && (!p.action_up)) {
+      if (!env.pogostick && (!p.action_up)) {
         p.jump_ready = 1;
         if (p.in_water == 0 && p.y.velocity < 0 && p.jump_abort == 1) {
-          if (settings.bunnies_in_space == 0)
+          if (!env.bunnies_in_space)
               /* normal gravity */
             p.y.velocity += 32768;
           else
@@ -152,7 +144,6 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
           }
         }
       }
-      sfx.spring();
     }
     s1 = (p.x.pos >> 16);
     s2 = (p.y.pos >> 16);
@@ -174,7 +165,6 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
         p.set_anim(4);
         if (p.y.velocity >= 32768) {
           objects.add(objects.SPLASH, (p.x.pos >> 16) + 8, ((p.y.pos >> 16) & 0xfff0) + 15, 0, 0, objects.ANIM_SPLASH, 0);
-          sfx.splash();
         }
       }
       /* slowly move up to water surface */
@@ -199,7 +189,7 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
       }
     } else {
       if (p.in_water == 0) {
-        if (settings.bunnies_in_space == 0)
+        if (!env.bunnies_in_space)
           p.y.velocity += 12288;
         else
           p.y.velocity += 6144;
@@ -220,7 +210,7 @@ function Movement(renderer, img, sfx, objects, settings, rnd) {
     /* collision check */
     for (var c1 = 0; c1 < 3; c1++) {
       for (var c2 = c1 + 1; c2 < 4; c2++) {
-        var pair = new Player_Pair(players[c1], players[c2], sfx, renderer, objects, img, settings);
+        var pair = new Player_Pair(players[c1], players[c2], renderer, objects, img);
         pair.collision_check();
       }
     }

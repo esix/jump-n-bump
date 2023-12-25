@@ -1,5 +1,5 @@
 
-function Renderer(canvas, img, level) {
+function Renderer(players, canvas, img, level) {
   "use strict";
   var main = { num_pobs: 0, pobs: [] };
   var leftovers = { num_pobs: 0, pobs: [] };
