@@ -1,4 +1,13 @@
+/**
+ *
+ * @type {Board[]}
+ */
 let g_boards = [];
+
+/**
+ *
+ * @type {Player[]}
+ */
 let g_players = [];
 
 
@@ -21,14 +30,18 @@ class Board {
     }
     return p;
   }
+
+  getPlayers() {
+    return this.current_game.players;
+  }
 }
 
 
 
 document.addEventListener('DOMContentLoaded', () => {
   // debug: run players
-  start();
-  start();
+  // start();
+  // start();
 }, false);
 
 
@@ -49,9 +62,28 @@ function start() {
   return player.id;
 }
 
-
+/**
+ *
+ * @param {string} playerId
+ * @returns {*[]}
+ */
 function state(playerId) {
   let player = g_players.find(p => p.id == playerId);
-  console.log('Player is alive', player);
-  return [{x: 5, y: 6}, {x: 6, y: 7}];
+  // console.log('Player is alive', player);
+  if (player) {
+    return player.board.getPlayers().map(p => p.toJSON());
+  } else {
+    return [];
+  }
+}
+
+
+function setPlayerInfo(playerId, xPos, yPos, xVelocity, yVelocity) {
+  let player = g_players.find(p => p.id == playerId);
+  if (player) {
+    player.x.pos = xPos;
+    player.y.pos = yPos;
+    player.x.velocity = xVelocity;
+    player.y.velocity = yVelocity;
+  }
 }

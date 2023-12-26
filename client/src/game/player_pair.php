@@ -85,15 +85,15 @@ class Player_Pair {
         if ($victim->anim != 6) {
             $victim->set_anim(6);
             if (!$this->settings['no_gore']) {
-                $this->objects->add_gore($victim->x->pos, $victim->y->pos, $victim->player_index);
+                $this->objects->add_gore($victim->x->pos, $victim->y->pos, $victim->idx);
             }
             $this->sfx->death();
             $killer->bumps++;
             $s1 = $killer->bumps % 100;
             if ($s1 % 10 == 0) {
-                $this->renderer->add_leftovers(360, 34 + $killer->player_index * 64, $this->img['numbers'], number_gobs[floor($s1 / 10) % 10]);
+                $this->renderer->add_leftovers(360, 34 + $killer->idx * 64, $this->img['numbers'], number_gobs[floor($s1 / 10) % 10]);
             }
-            $this->renderer->add_leftovers(376, 34 + $killer->player_index * 64, $this->img['numbers'], number_gobs[$s1 % 10]);
+            $this->renderer->add_leftovers(376, 34 + $killer->idx * 64, $this->img['numbers'], number_gobs[$s1 % 10]);
         }
     }
 }

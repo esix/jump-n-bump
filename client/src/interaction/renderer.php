@@ -107,7 +107,7 @@ class Renderer {
 
         foreach ($players as $p) {
             if ($p->enabled) {
-                $this->add_pob($p->x->pos >> 16, $p->y->pos >> 16, $this->img['rabbits'], rabbit_gobs[$p->get_image() + $p->player_index * 18]);
+                $this->add_pob($p->x->pos >> 16, $p->y->pos >> 16, $this->img['rabbits'], rabbit_gobs[$p->get_image() + $p->idx * 18]);
             }
         }
         $this->draw_leftovers();

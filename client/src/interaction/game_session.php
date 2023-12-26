@@ -1,15 +1,12 @@
 <?php
 require_once __DIR__ . '/../interaction/renderer.php';
 require_once __DIR__ . "/../game/objects.php";
-require_once __DIR__ . "/../game/keyboard.php";
-require_once __DIR__ . "/../game/ai.php";
 require_once __DIR__ . "/../game/animation.php";
 require_once __DIR__ . "/../resource_loading/sound_player.php";
 require_once __DIR__ . "/../game/sfx.php";
 require_once __DIR__ . "/../game/movement.php";
 require_once __DIR__ . "/../game/game.php";
 require_once __DIR__ . "/../game/player.php";
-// import { Scores_ViewModel } from "../interaction/scores_viewmodel";
 require_once __DIR__ . "/../env.php";
 
 enum Game_State {
@@ -25,8 +22,8 @@ class Game_Session {
     private Game_State $game_state = Game_State::Not_Started;
     private Sound_Player $sound_player;
     private Game $game;
-    private Keyboard $keyboard;
     private $muted;
+    private $current_keys = array();
 
     public function __construct($canvas, $level) {
         $this->canvas = $canvas;
@@ -51,20 +48,23 @@ class Game_Session {
         $renderer = new Renderer($canvas, $img, $level);
         $objects = new Objects();
         $key_action_mappings = [];
-        $this->keyboard = new Keyboard($key_action_mappings);
-        $ai = new AI($this->keyboard);
         $animation = new Animation($renderer, $img, $objects);
         $this->sound_player = new Sound_Player($this->muted);
         $sfx = new Sfx($this->sound_player);
         $movement = new Movement($renderer, $img, $sfx, $objects, $settings);
-        $this->game = new Game($movement, $ai, $animation, $renderer, $objects, [$this->keyboard, 'key_pressed'], $level, true);
+        $this->game = new Game($movement, $animation, $renderer, $objects, $level, true);
 
         // this.scores = ko.observable([[]]);
         $this->game_state = Game_State::Not_Started;
     }
 
-    public function set_current_keys($current_keys) {
-        $this->keyboard->set_current_keys($current_keys);
+    public function set_player_info($players_info) {
+        global $players;
+        foreach ($players_info as $player_info) {
+            $id = $player_info['id'];
+            $idx = $player_info['idx'];
+            $players[$idx]->unpack($player_info);
+        }
     }
 
     private function set_game_state($game_state) {
@@ -82,32 +82,8 @@ class Game_Session {
         $this->unpause();
     }
 
-    public function pump() {
-        $this->game->pump();
+    public function pump($current_keys) {
+        $this->game->pump($current_keys);
     }
-
-//     key_action_mappings["M"] = function () {
-//         if (self.game_state() === Game_State.Playing) {
-//             muted = !muted;
-//             self.sound_player.toggle_sound();
-//         }
-//     }
-
-//     key_action_mappings["P"] = function () {
-//         switch(self.game_state()) {
-//             case Game_State.Not_Started:
-//                 self.start();
-//                 break;
-//             case Game_State.Paused:
-//                 self.unpause();
-//                 break;
-//             case Game_State.Playing:
-//                 self.pause();
-//                 break;
-//         }
-//     };
-
-//     document.onkeydown = keyboard.onKeyDown;
-//     document.onkeyup = keyboard.onKeyUp;
 }
 

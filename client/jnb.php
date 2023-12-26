@@ -2,7 +2,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/src/asset_data/default_levelmap.php';
 require_once __DIR__ . '/src/interaction/game_session.php';
-require_once __DIR__ . '/src/chrome-remote-interface/index.php';
+require_once __DIR__ . '/src/chrome.php';
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 
@@ -14,28 +14,8 @@ const WINDOW_HEIGHT = 768;
 // start
 
 $tabs = list_tabs();
-$webSocketDebuggerUrl = $tabs[0]->webSocketDebuggerUrl;
-$request_id = 0;
-$conn;
-$player_id;
-$callbacks = array();
-
-
-function run_code($code) {
-    return new Promise(function(callable $callback) use ($code) {
-        global $request_id, $conn, $callbacks;
-        $request_id++;
-        $callbacks[$request_id] = $callback;
-        $msg = json_encode(array(
-            'id' => $request_id,
-            'method' => 'Runtime.evaluate',
-            // 'sessionId' => $sessionId,
-            'params' => array('expression' => $code),
-        ));
-        echo "send $msg\n";
-        $conn->send($msg);
-    });
-}
+$webSocketDebuggerUrl = $tabs[0]->webSocketDebuggerUrl;             // TODO: search by title  "title": "Jump &#39;n Bump server",
+$current_game;
 
 
 \Ratchet\Client\connect($webSocketDebuggerUrl)
@@ -46,7 +26,7 @@ function run_code($code) {
         $conn->on('message', function($msg) use ($conn) {
             global $callbacks;
             $decoded = json_decode("$msg");
-            if ($callbacks[$decoded->id] ?? null) {
+            if ($decoded->id && $decoded->result && ($callbacks[$decoded->id] ?? null)) {
                 call_user_func($callbacks[$decoded->id], $decoded->result);
             } else {
                 echo "Received: {$msg}\n";
@@ -56,14 +36,27 @@ function run_code($code) {
 
     }, function ($e) {
         echo "Could not connect: {$e->getMessage()}\n";
+        exit(1);
     })
     ->then(function() {
-        echo "AAAAAAA\n";
-        return run_code('start()');
+        // return runtime_evaluate('start()');
+        return runtime_evaluate('window.location.href');
+    })
+    ->then(function($href) {
+        var_dump($href->result->value);
+    })
+    ->then(function() {
+        // return runtime_evaluate('start()');
+        return runtime_evaluate('window.start()');
     })
     ->then(function($start_state) {
-        echo "start returned:\n";
-        var_dump($start_state);
+        global $player_id;
+        $player_id = $start_state->result->value;
+        if (!$player_id) {
+            var_dump($start_state);
+            die ("No player id\n");
+        }
+        echo "player_id = $player_id\n";
     })
     ->then(function() {
         global $window, $canvas, $current_game, $event;
@@ -79,6 +72,7 @@ function run_code($code) {
         // Main loop
         $event = new SDL_Event;
 
+        // 1000 / FPS
         Loop::addPeriodicTimer(0.005, function () {
             global $canvas, $window;
             if (!game_loop()) {
@@ -88,8 +82,69 @@ function run_code($code) {
                 die(1);
             }
         });
+
+        Loop::addTimer(0.01, function() { request_state(); });
     });
 
+
+function parse_player_info($player_info) {
+    $result = array();
+
+    foreach ($player_info as $obj) {
+        if ($obj->isOwn) {
+            $name = $obj->name;
+            $value = $obj->value ? $obj->value->value : null;
+            $result[$obj->name] = $value;
+        }
+    }
+
+    return $result;
+}
+
+
+function request_state() {
+    global $players, $player_id;
+
+    foreach($players as $p) {
+        if ($p->id === $player_id) {
+            $xPos = $p->x->pos;
+            $xVelocity = $p->x->velocity;
+            $yPos = $p->y->pos;
+            $yVelocity = $p->y->velocity;
+            runtime_evaluate("window.setPlayerInfo('$player_id', $xPos, $yPos, $xVelocity, $yVelocity)");
+        }
+    }
+
+    runtime_evaluate("window.state('$player_id')")->then(function($state) {
+        $object_id = $state->result->objectId;
+        return runtime_getProperties($object_id);
+
+    })
+    ->then(function($response) {
+        $result = $response->result;
+        $promises = array();
+
+        foreach ($result as $obj) {
+            if (is_numeric($obj->name)) {
+                $promises[$obj->name] = runtime_getProperties($obj->value->objectId);
+            }
+        }
+
+        return React\Promise\all($promises);
+    })
+    ->then(function($obj_players) {
+        global $current_game;
+        $players_info = array();
+        foreach ($obj_players as $player_idx => $obj) {
+            $player_info = parse_player_info($obj->result);
+            $players_info[$player_idx] = $player_info;
+        }
+        $current_game->set_player_info($players_info);
+    })
+    ->then(function() {
+        Loop::addTimer(0.005, function() { request_state(); });
+    });
+}
 
 
 function game_loop() {
@@ -101,23 +156,9 @@ function game_loop() {
     }
 
     $keyboardState = SDL_GetKeyboardState($numkeys);
-    $current_game->set_current_keys($keyboardState);
-    $current_game->pump();
+    $current_game->pump($keyboardState);
     // SDL_Delay(5);
     // }
     return true;
 }
 
-
-function request_state() {
-    global $player_id;
-    return run_code("state('$player_id')")->then(function($state) {
-        echo "request_state:\n";
-        var_dump($state);
-    });
-}
-
-Loop::addPeriodicTimer(5, function () {
-    echo "PeriodicTimer\n";
-    request_state();
-});

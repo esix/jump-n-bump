@@ -8,7 +8,8 @@ $players = [];
 
 
 class Player {
-    public $player_index;
+    public $id;
+    public $idx;
     public $keys;
     public $is_server;
     public $ai = false;
@@ -28,13 +29,28 @@ class Player {
     public $frame = 0;
     public $frame_tick = 0;
 
-    public function __construct($player_index, $keys, $is_server) {
-        $this->player_index = $player_index;
+    public function __construct($idx, $keys, $is_server) {
+        $this->id = '';
+        $this->idx = $idx;
         $this->keys = $keys;
         $this->is_server = $is_server;
 
         $this->x = new Point(0, 0);
         $this->y = new Point(0, 0);
+    }
+
+    public function unpack($obj) {
+        global $player_id;
+        $this->id = $obj['id'];
+        $this->enabled = $obj['enabled'];
+        $this->bumps = $obj['bumps'];
+        if ($this->id !== $player_id) {
+            $this->x->pos = $obj['xPos'];
+            $this->x->velocity = $obj['xVelocity'];
+            $this->y->pos = $obj['yPos'];
+            $this->y->velocity = $obj['yVelocity'];
+            $this->direction = $obj['direction'];
+        }
     }
 
     public function set_anim($animIndex) {
@@ -63,7 +79,7 @@ class Player {
 
     public function position_player() {
         global $players;
-        $player_num = $this->player_index;
+        $player_num = $this->idx;
 
         do {
             $x = rnd(LEVEL_WIDTH);

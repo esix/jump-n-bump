@@ -12,24 +12,20 @@ const FPS = 60;
 
 class Game {
     private $movement;
-    private $ai;
     private $animation;
     private $renderer;
     private $objects;
-    private $key_pressed;
     private $level;
     private $is_server;
 
     private $next_time;
     private $playing;
 
-    public function __construct($movement, $ai, $animation, $renderer, $objects, $key_pressed, $level, $is_server) {
+    public function __construct($movement, $animation, $renderer, $objects, $level, $is_server) {
         $this->movement = $movement;
-        $this->ai = $ai;
         $this->animation = $animation;
         $this->renderer = $renderer;
         $this->objects = $objects;
-        $this->key_pressed = $key_pressed;
         $this->level = $level;
         $this->is_server = $is_server;
 
@@ -47,7 +43,6 @@ class Game {
             new Player(2, [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8], $this->is_server),
             new Player(3, [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I], $this->is_server)
         ];
-        $players[3]->ai = true;
     }
 
     private function reset_level() {
@@ -67,19 +62,24 @@ class Game {
         return floor(microtime(true) * 1000);
     }
 
-    private function update_player_actions() {
-        global $players;
+    private function update_player_actions($current_keys) {
+        global $players, $player_id;
         foreach ($players as $p) {
-            $p->action_left = call_user_func($this->key_pressed, $p->keys[0]);
-            $p->action_right = call_user_func($this->key_pressed, $p->keys[1]);
-            $p->action_up = call_user_func($this->key_pressed, $p->keys[2]);
+            if ($p->id == $player_id) {                                                             // current player
+                // new Player(0, [SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_UP], $this->is_server),
+                // new Player(1, [SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_W], $this->is_server),
+                // new Player(2, [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8], $this->is_server),
+                // new Player(3, [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I], $this->is_server)
+                $p->action_left = $current_keys[SDL_SCANCODE_LEFT] ?? false;
+                $p->action_right = $current_keys[SDL_SCANCODE_RIGHT] ?? false;
+                $p->action_up = $current_keys[SDL_SCANCODE_UP] ?? false;
+            }
         }
     }
 
-    private function steer_players() {
+    private function steer_players($current_keys) {
         global $players;
-        $this->ai->cpu_move();
-        $this->update_player_actions();
+        $this->update_player_actions($current_keys);
         foreach ($players as $p) {
             if ($p->enabled) {
                 if (!$p->dead_flag) {
@@ -90,22 +90,21 @@ class Game {
         }
     }
 
-    private function game_iteration() {
-        $this->steer_players();
+    private function game_iteration($current_keys) {
+        $this->steer_players($current_keys);
         $this->movement->collision_check();
         $this->animation->update_object();
         $this->renderer->draw();
     }
 
-    public function pump() {
+    public function pump($current_keys) {
         if (!$this->playing) return;
 
         $now = $this->timeGetTime();
         $time_diff = $this->next_time - $now;
 
         while ($time_diff <= 0) {
-//             echo "PUMP" . $this->next_time . "\n";
-            $this->game_iteration();
+            $this->game_iteration($current_keys);
             $this->next_time += (1000 / FPS);
             $time_diff = $this->next_time - $now;
         }
@@ -114,7 +113,7 @@ class Game {
     public function start() {
         $this->next_time = $this->timeGetTime() + 1000;
         $this->playing = true;
-        $this->pump();
+        // $this->pump();
     }
 
     public function pause() {

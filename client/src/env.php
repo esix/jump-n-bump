@@ -12,6 +12,8 @@ function rnd($max_value) {
     return rand(0, $max_value);
 }
 
+$player_id;
+
 
 class Point {
     public float $pos;
