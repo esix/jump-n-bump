@@ -88,7 +88,7 @@ class Player_Pair {
                 $this->objects->add_gore($victim->x->pos, $victim->y->pos, $victim->idx);
             }
             $this->sfx->death();
-            $killer->bumps++;
+            // $killer->bumps++;
             $s1 = $killer->bumps % 100;
             if ($s1 % 10 == 0) {
                 $this->renderer->add_leftovers(360, 34 + $killer->idx * 64, $this->img['numbers'], number_gobs[floor($s1 / 10) % 10]);

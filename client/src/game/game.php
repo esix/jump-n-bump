@@ -16,18 +16,16 @@ class Game {
     private $renderer;
     private $objects;
     private $level;
-    private $is_server;
 
     private $next_time;
     private $playing;
 
-    public function __construct($movement, $animation, $renderer, $objects, $level, $is_server) {
+    public function __construct($movement, $animation, $renderer, $objects, $level) {
         $this->movement = $movement;
         $this->animation = $animation;
         $this->renderer = $renderer;
         $this->objects = $objects;
         $this->level = $level;
-        $this->is_server = $is_server;
 
         $this->next_time = 0;
         $this->playing = false;
@@ -38,10 +36,10 @@ class Game {
     private function reset_players() {
         global $players;
         $players = [
-            new Player(0, [SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_UP], $this->is_server),
-            new Player(1, [SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_W], $this->is_server),
-            new Player(2, [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8], $this->is_server),
-            new Player(3, [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I], $this->is_server)
+            new Player(0),
+            new Player(1),
+            new Player(2),
+            new Player(3)
         ];
     }
 
@@ -52,7 +50,7 @@ class Game {
 
         foreach ($players as $p) {
             if ($p->enabled) {
-                $p->bumps = 0;
+//                 $p->bumps = 0;
                 $p->position_player();
             }
         }
@@ -66,10 +64,10 @@ class Game {
         global $players, $player_id;
         foreach ($players as $p) {
             if ($p->id == $player_id) {                                                             // current player
-                // new Player(0, [SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_UP], $this->is_server),
-                // new Player(1, [SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_W], $this->is_server),
-                // new Player(2, [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8], $this->is_server),
-                // new Player(3, [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I], $this->is_server)
+                // 0 => [SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_UP]),
+                // 1 => [SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_W]),
+                // 2 => [SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_8]),
+                // 3 => [SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_I])
                 $p->action_left = $current_keys[SDL_SCANCODE_LEFT] ?? false;
                 $p->action_right = $current_keys[SDL_SCANCODE_RIGHT] ?? false;
                 $p->action_up = $current_keys[SDL_SCANCODE_UP] ?? false;

@@ -14,7 +14,18 @@ const WINDOW_HEIGHT = 768;
 // start
 
 $tabs = list_tabs();
-$webSocketDebuggerUrl = $tabs[0]->webSocketDebuggerUrl;             // TODO: search by title  "title": "Jump &#39;n Bump server",
+foreach ($tabs as $tab) {
+    if (str_ends_with($tab->url, 'jnb.html')) {
+        $webSocketDebuggerUrl = $tab->webSocketDebuggerUrl;             // TODO: search by title  "title": "Jump &#39;n Bump server",
+    }
+}
+
+if (!$webSocketDebuggerUrl) {
+    var_dump(tabs);
+    die ('Tab not found');
+}
+
+
 $current_game;
 
 

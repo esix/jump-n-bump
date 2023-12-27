@@ -14,7 +14,6 @@ function list_tabs() {
     }
     curl_close($curl);
     $decoded = json_decode($curl_response);
-    var_dump($curl_response);
     return $decoded;
 }
 

@@ -10,15 +10,13 @@ $players = [];
 class Player {
     public $id;
     public $idx;
-    public $keys;
-    public $is_server;
     public $ai = false;
     public $action_left = false;
     public $action_up = false;
     public $action_right = false;
     public $enabled = true;
     public $dead_flag = false;
-    public $bumps = false;
+    public $bumps = 0;
     public Point $x;
     public Point $y;
     public $direction = 0;
@@ -29,11 +27,9 @@ class Player {
     public $frame = 0;
     public $frame_tick = 0;
 
-    public function __construct($idx, $keys, $is_server) {
+    public function __construct($idx) {
         $this->id = '';
         $this->idx = $idx;
-        $this->keys = $keys;
-        $this->is_server = $is_server;
 
         $this->x = new Point(0, 0);
         $this->y = new Point(0, 0);
@@ -107,8 +103,6 @@ class Player {
         $this->in_water = 0;
         $this->set_anim(0);
 
-        if ($this->is_server) {
-            $this->dead_flag = 0;
-        }
+        $this->dead_flag = 0;
     }
 }

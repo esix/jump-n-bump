@@ -37,14 +37,14 @@ class Board {
 }
 
 
+window.setInterval(() => {
+  g_players.forEach(p => {
+    if (p.enabled && !p.ai && p.isDisconnected()) {
+      p.enabled = false;
+    }
+  });
 
-document.addEventListener('DOMContentLoaded', () => {
-  // debug: run players
-  // start();
-  // start();
-}, false);
-
-
+}, 1000);
 
 
 // ** public api **
@@ -69,8 +69,8 @@ function start() {
  */
 function state(playerId) {
   let player = g_players.find(p => p.id == playerId);
-  // console.log('Player is alive', player);
   if (player) {
+    player.setConnected();
     return player.board.getPlayers().map(p => p.toJSON());
   } else {
     return [];
@@ -81,6 +81,7 @@ function state(playerId) {
 function setPlayerInfo(playerId, xPos, yPos, xVelocity, yVelocity) {
   let player = g_players.find(p => p.id == playerId);
   if (player) {
+    player.setConnected();
     player.x.pos = xPos;
     player.y.pos = yPos;
     player.x.velocity = xVelocity;

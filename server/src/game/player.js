@@ -29,6 +29,15 @@ function Player(id, idx, keys, enabled, ai) {
   this.anim = 0;
   this.frame = 0;
   this.frame_tick = 0;
+  this.lastTimer = new Date().valueOf();
+
+  this.setConnected = function() {
+    this.lastTimer = new Date().valueOf();
+  }
+
+  this.isDisconnected = function() {
+    return (new Date().valueOf() - this.lastTimer > 5000);                  // 5 seconds no signal
+  }
 
   this.set_anim = function (animIndex) {
     this.anim = animIndex;
